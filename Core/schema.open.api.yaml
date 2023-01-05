@@ -1,0 +1,154 @@
+﻿openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    This is an OpenAPI 3.0 specification for sample Blazor SignalR implementation of MS Teams application.
+  termsOfService: ""
+  contact:
+    email: support@mailserver.com
+  license:
+    name: GNU General Public License v3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+  version: 1.0.1
+externalDocs:
+  description: Find out more about Teams
+  url: https://learn.microsoft.com/en-us/microsoftteams/teams-overview
+servers:
+  - url: https://localhost:7104/api/
+tags:
+  - name: conversation
+    description: Actions targeting conversations
+  - name: contact
+    description: Actions targeting contacts
+  - name: person
+    description: Actions targeting people
+paths:
+  /conversation/start:
+    post:
+      tags:
+        - conversation
+      summary: Start a new conversation
+      description: Creates a new conversation with chosen participants
+      operationId: Start
+      requestBody:
+        description: Holds IDs of participants to reference contacts when creating a new conversation
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationStartDto'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/ConversationStartDto'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConversationStartDto'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '405':
+          description: Invalid input
+  /conversation/{conversationId}:
+    get:
+      tags:
+        - conversation
+      summary: Get conversation with last N messages by ConversationID
+      description: Returns a conversation with last N messages
+      operationId: Index
+      parameters:
+        - name: conversationId
+          in: path
+          description: ID of conversation to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Conversation not found
+    delete:
+      tags:
+        - conversation
+      summary: Deletes a conversation
+      description: delete a conversation
+      operationId: Delete
+      parameters:
+        - name: conversationId
+          in: path
+          description: Pet id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid pet value
+components:
+  schemas:
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+    ConversationStartDto:
+      type: object
+      properties:
+        participantIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+    Contact:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+      xml:
+        name: contact
+    Person:
+      required:
+        - firstName
+        - lastName
+        - userName
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Smith
+        userName:
+          type: string
+          example: johnsmith@mailserver.com
+        contactInfo:
+          $ref: '#/components/schemas/Contact'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+      xml:
+        name: person

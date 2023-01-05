@@ -1,0 +1,50 @@
+﻿@page "/last"
+@using Teams.Core
+@inject HttpClient Http
+
+<PageTitle>Last conversation</PageTitle>
+
+@if (conversation?.Messages == null)
+{
+    <div>
+        <p><em>Loading...</em></p>
+    </div>
+}
+else
+{
+    @foreach (var message in messages)
+    {
+        <div>@message.Content</div>
+        <div>
+            <span>@message.EditedAt.ToShortDateString()</span>
+            <span>@message.Author.UserName</span>
+        </div>
+    }
+}
+<div>
+    <input type="text" @bind="draft"></input>
+    <button @onclick="Send">Send</button>
+</div>
+
+@code {
+    private Teams.Core.Conversation.Conversation? conversation;
+    private IEnumerable<Teams.Core.Message.Message> messages;
+    private string draft = "";
+    private Teams.Core.Person.Person user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await Http.GetFromJsonAsync<Teams.Core.Person.Person>("api/person?id=1");
+        conversation = await Http.GetFromJsonAsync<Teams.Core.Conversation.Conversation>("api/conversation?id=0");
+
+        messages = conversation?.Messages ?? new List<Teams.Core.Message.Message>();
+    }
+
+    private async void Send()
+    {
+        var draft = new Teams.Core.Message.Message();
+        draft.Conversation = this.conversation;
+        draft.Author = this.user;
+        await Http.PostAsJsonAsync<Teams.Core.Message.Message>("api/message/", draft);
+    }
+}
